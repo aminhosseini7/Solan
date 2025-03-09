@@ -1,2 +1,7 @@
 pandas
 openpyxl
+
+
+
+
+Added requirements.txt to install dependencies
