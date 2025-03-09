@@ -1,7 +1,3 @@
-pandas
-openpyxl
-
-
-
-
-Added requirements.txt to install dependencies
+git add requirements.txt
+git commit -m "Added requirements.txt"
+git push origin main
