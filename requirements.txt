@@ -1,4 +1,4 @@
 pandas
 openpyxl
-streamlit
-numpy
+colorama
+gradio
