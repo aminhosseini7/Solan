@@ -31,6 +31,20 @@ filtered_produce = df_produce[df_produce["کد جایگزین اصلی"] == user
 formulas_used = filtered_produce["کد فرمول"].unique()
 order_numbers = filtered_produce["شماره سفارش تولید"].unique()
 
+
+
+
+
+
+
+
+
+# لیست برای ذخیره داده‌های نهایی
+results = []
+
+
+
+
 if len(formulas_used) == 0:
     print(f"{Fore.RED}⛔ کد کالا {user_input_kala} در داده‌ها پیدا نشد!{Style.RESET_ALL}")
 else:
@@ -112,31 +126,30 @@ else:
 
 
 
+                # حلقه‌ی پردازش همان‌طور که هست ادامه دارد ...
+                # داخل حلقه‌ی داخلی بعد از محاسبه total_cost، این بخش را اضافه کن:
 
-# لیست برای ذخیره داده‌های نهایی
-results = []
-
-# حلقه‌ی پردازش همان‌طور که هست ادامه دارد ...
-# داخل حلقه‌ی داخلی بعد از محاسبه total_cost، این بخش را اضافه کن:
-
-results.append({
-    "کد فرمول": formula,
-    "شماره سفارش": order,
-    "نام دستگاه": machine_name,
-    "تولید خالص (kg)": total_clean_production,
-    "تولید ناخالص (kg)": total_gross_production,
-    "ضایعات (kg)": total_waste,
-    "وزن بوبین کل (kg)": total_bobin_weight,
-    "ماه": order_month,
-    "هزینه سربار (ریال)": machine_overhead_cost,
-    "هزینه مواد اولیه (ریال)": total_material_cost,
-    "هزینه ضایعات (ریال)": total_waste * waste_price,
-    "هزینه کل نهایی (ریال)": total_cost
-})
+                results.append({
+                    "کد فرمول": formula,
+                    "شماره سفارش": order,
+                    "نام دستگاه": machine_name,
+                    "تولید خالص (kg)": total_clean_production,
+                    "تولید ناخالص (kg)": total_gross_production,
+                    "ضایعات (kg)": total_waste,
+                    "وزن بوبین کل (kg)": total_bobin_weight,
+                    "ماه": order_month,
+                    "هزینه سربار (ریال)": machine_overhead_cost,
+                    "هزینه مواد اولیه (ریال)": total_material_cost,
+                    "هزینه ضایعات (ریال)": total_waste * waste_price,
+                    "هزینه کل نهایی (ریال)": total_cost
+                })
 
 # در انتهای اسکریپت، پس از تمام شدن حلقه‌ها:
 df_results = pd.DataFrame(results)
 
-# نمایش جدول
-print(f"\n\n📋 {Fore.CYAN}جدول نهایی خروجی:{Style.RESET_ALL}")
-print(df_results.to_string(index=False))
+if df_results.empty:
+    print(f"{Fore.RED}❌ هیچ داده‌ای برای نمایش در جدول نهایی یافت نشد.{Style.RESET_ALL}")
+else:
+    print(f"\n\n📋 {Fore.CYAN}جدول نهایی خروجی:{Style.RESET_ALL}")
+    print(df_results.to_string(index=False))  # ← این خط جدول رو کامل و بدون اندیس چاپ می‌کنه
+
