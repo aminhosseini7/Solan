@@ -26,24 +26,12 @@ user_input_kala = input(f"{Fore.CYAN}🔹 لطفاً کد جایگزین اصل�
 total_production = float(input(f"{Fore.CYAN}🔹 لطفاً مقدار کل تولید خالص را وارد کنید (کیلوگرم): {Style.RESET_ALL}").strip())
 waste_price = float(input(f"{Fore.CYAN}🔹 لطفاً قیمت هر کیلوگرم ضایعات را وارد کنید: {Style.RESET_ALL}").strip())
 
-# پیدا کردن کد فرمول و شماره سفارش مرتبط با کد کالا
+# فیلتر فرمول‌ها و سفارش‌ها
 filtered_produce = df_produce[df_produce["کد جایگزین اصلی"] == user_input_kala]
 formulas_used = filtered_produce["کد فرمول"].unique()
 order_numbers = filtered_produce["شماره سفارش تولید"].unique()
 
-
-
-
-
-
-
-
-
-# لیست برای ذخیره داده‌های نهایی
 results = []
-
-
-
 
 if len(formulas_used) == 0:
     print(f"{Fore.RED}⛔ کد کالا {user_input_kala} در داده‌ها پیدا نشد!{Style.RESET_ALL}")
@@ -51,7 +39,6 @@ else:
     print(f"\n✅ کد فرمول‌های مرتبط با {Fore.GREEN}{user_input_kala}{Style.RESET_ALL}: {formulas_used}")
     print(f"✅ شماره سفارش‌های مرتبط: {Fore.GREEN}{order_numbers}{Style.RESET_ALL}")
 
-    # پردازش اطلاعات برای هر کد فرمول و شماره سفارش
     for formula in formulas_used:
         for order in order_numbers:
             print(f"\n🔹 {Fore.YELLOW}**محاسبه برای کد فرمول {formula} و شماره سفارش {order}:**{Style.RESET_ALL}")
@@ -65,7 +52,6 @@ else:
                 print(f"{Fore.RED}⛔ هیچ داده‌ای برای کد فرمول {formula} و شماره سفارش {order} یافت نشد!{Style.RESET_ALL}")
                 continue
 
-            # **🔹 استخراج دستگاه‌های استفاده‌شده در این سفارش**
             machine_names = df_formula_data["نام دستگاه"].unique()
 
             for machine_name in machine_names:
@@ -84,7 +70,6 @@ else:
                 print(f"📊 مقدار وزن بوبین: {Fore.GREEN}{total_bobin_weight:.2f}{Style.RESET_ALL} کیلوگرم")
                 print(f"📊 ماه تولید سفارش: {Fore.CYAN}{order_month}{Style.RESET_ALL}")
 
-                # دریافت هزینه سربار دستگاه
                 machine_overhead_row = df_machine_overhead[
                     (df_machine_overhead["نام دستگاه"] == machine_name) & 
                     (df_machine_overhead["ماه"] == order_month)
@@ -93,8 +78,8 @@ else:
 
                 print(f"📊 هزینه سربار: 💰 {Fore.YELLOW}{machine_overhead_cost}{Style.RESET_ALL}")
 
-                # **🔹 محاسبه بهای تمام‌شده مواد اولیه**
                 total_material_cost = 0  
+                material_details = ""
                 df_materials_info = df_daily[
                     (df_daily["کد فرمول"] == formula) & 
                     (df_daily["شماره سفارش"] == order)
@@ -102,6 +87,7 @@ else:
 
                 if df_materials_info.empty:
                     print(f"{Fore.RED}⛔ هیچ ماده اولیه‌ای برای کد فرمول {formula} و شماره سفارش {order} یافت نشد!{Style.RESET_ALL}")
+                    material_details = "⛔ یافت نشد"
                 else:
                     df_materials_info = df_materials_info.merge(
                         df_raw_material[["کد کالای مواد اولیه", "قیمت واحد"]],
@@ -117,17 +103,10 @@ else:
                     for _, row in df_materials_info.iterrows():
                         print(f"- {row['کد کالای مواد اولیه']}: {Fore.CYAN}{row['استفاده مواد اولیه']} kg{Style.RESET_ALL} × "
                               f"{Fore.YELLOW}{row['قیمت واحد']}{Style.RESET_ALL} = 💰 {Fore.GREEN}{row['هزینه مواد اولیه']:.2f}{Style.RESET_ALL}")
+                        material_details += f"{row['کد کالای مواد اولیه']}: {row['استفاده مواد اولیه']}kg × {row['قیمت واحد']} = {row['هزینه مواد اولیه']:.0f}\n"
 
-                # محاسبه هزینه کل
-                total_cost = machine_overhead_cost + total_material_cost + (total_waste * waste_price)
+                total_cost = float(machine_overhead_cost) + total_material_cost + (total_waste * waste_price)
                 print(f"\n✅ **بهای تمام‌شده کل: 💰 {Fore.GREEN}{total_cost:.2f}{Style.RESET_ALL}**")
-
-
-
-
-
-                # حلقه‌ی پردازش همان‌طور که هست ادامه دارد ...
-                # داخل حلقه‌ی داخلی بعد از محاسبه total_cost، این بخش را اضافه کن:
 
                 results.append({
                     "کد فرمول": formula,
@@ -138,18 +117,18 @@ else:
                     "ضایعات (kg)": total_waste,
                     "وزن بوبین کل (kg)": total_bobin_weight,
                     "ماه": order_month,
-                    "هزینه سربار (ریال)": machine_overhead_cost,
+                    "جزئیات مواد اولیه": material_details.strip(),
+                    "هزینه سربار (ریال)": float(machine_overhead_cost),
                     "هزینه مواد اولیه (ریال)": total_material_cost,
                     "هزینه ضایعات (ریال)": total_waste * waste_price,
                     "هزینه کل نهایی (ریال)": total_cost
                 })
 
-# در انتهای اسکریپت، پس از تمام شدن حلقه‌ها:
+# نمایش جدول نهایی
 df_results = pd.DataFrame(results)
 
 if df_results.empty:
     print(f"{Fore.RED}❌ هیچ داده‌ای برای نمایش در جدول نهایی یافت نشد.{Style.RESET_ALL}")
 else:
     print(f"\n\n📋 {Fore.CYAN}جدول نهایی خروجی:{Style.RESET_ALL}")
-    print(df_results.to_string(index=False))  # ← این خط جدول رو کامل و بدون اندیس چاپ می‌کنه
-
+    print(df_results.to_string(index=False))
