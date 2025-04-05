@@ -107,3 +107,36 @@ else:
                 # محاسبه هزینه کل
                 total_cost = machine_overhead_cost + total_material_cost + (total_waste * waste_price)
                 print(f"\n✅ **بهای تمام‌شده کل: 💰 {Fore.GREEN}{total_cost:.2f}{Style.RESET_ALL}**")
+
+
+
+
+
+
+# لیست برای ذخیره داده‌های نهایی
+results = []
+
+# حلقه‌ی پردازش همان‌طور که هست ادامه دارد ...
+# داخل حلقه‌ی داخلی بعد از محاسبه total_cost، این بخش را اضافه کن:
+
+results.append({
+    "کد فرمول": formula,
+    "شماره سفارش": order,
+    "نام دستگاه": machine_name,
+    "تولید خالص (kg)": total_clean_production,
+    "تولید ناخالص (kg)": total_gross_production,
+    "ضایعات (kg)": total_waste,
+    "وزن بوبین کل (kg)": total_bobin_weight,
+    "ماه": order_month,
+    "هزینه سربار (ریال)": machine_overhead_cost,
+    "هزینه مواد اولیه (ریال)": total_material_cost,
+    "هزینه ضایعات (ریال)": total_waste * waste_price,
+    "هزینه کل نهایی (ریال)": total_cost
+})
+
+# در انتهای اسکریپت، پس از تمام شدن حلقه‌ها:
+df_results = pd.DataFrame(results)
+
+# نمایش جدول
+print(f"\n\n📋 {Fore.CYAN}جدول نهایی خروجی:{Style.RESET_ALL}")
+print(df_results.to_string(index=False))
